@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { IWindow } from '../types';
 import { aiSOSResponse } from '../services/gemini';
-import { saveSOSScenario, getRecentSOS } from '../services/storage';
+import { saveSOSScenario } from '../services/storage';
+import { Button } from '../components/ui/button';
+import { Card, CardContent } from '../components/ui/card';
+import { Skeleton } from '../components/ui/skeleton';
 
 const SOSPage: React.FC = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -11,14 +14,13 @@ const SOSPage: React.FC = () => {
   const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
-    // Initialize Speech Recognition
     const win = window as unknown as IWindow;
     const SpeechRecognition = win.SpeechRecognition || win.webkitSpeechRecognition;
     
     if (SpeechRecognition) {
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = false;
-      recognitionRef.current.lang = 'zh-CN'; // Input language is Chinese as per requirements
+      recognitionRef.current.lang = 'zh-CN';
       recognitionRef.current.interimResults = false;
 
       recognitionRef.current.onresult = (event: any) => {
@@ -47,15 +49,11 @@ const SOSPage: React.FC = () => {
     try {
       const sosResult = await aiSOSResponse(text);
       setResult(sosResult);
-      
-      // Save to local history
       await saveSOSScenario({
         originalText: text,
         nativeExpression: sosResult.native,
         createdAt: Date.now()
       });
-
-      // Auto play audio
       speak(sosResult.native);
     } catch (e) {
       console.error(e);
@@ -73,35 +71,35 @@ const SOSPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-full flex flex-col p-6 bg-gradient-to-b from-space-900 to-space-800">
+    <div className="min-h-full flex flex-col p-6 bg-gradient-to-b from-background to-secondary/20">
       
-      <header className="mb-8 mt-4">
-        <h1 className="text-3xl font-extrabold text-white tracking-tight">
-          Scene <span className="text-space-danger">SOS</span>
+      <header className="mb-10 mt-6 animate-slide-up">
+        <h1 className="text-4xl font-extrabold tracking-tight">
+          Scene <span className="text-destructive">SOS</span>
         </h1>
-        <p className="text-slate-400 text-sm mt-1">Stuck? Say it in Chinese.</p>
+        <p className="text-muted-foreground mt-2 font-medium">Stuck? Say it in Chinese.</p>
       </header>
 
       {/* Main Interaction Area */}
-      <div className="flex-1 flex flex-col items-center justify-center space-y-8">
+      <div className="flex-1 flex flex-col items-center justify-center space-y-12 pb-10">
         
         {!result && !loading && (
           <button
             onClick={handleRecord}
             disabled={isRecording}
-            className={`w-48 h-48 rounded-full flex items-center justify-center shadow-[0_0_40px_-10px_rgba(248,113,113,0.3)] transition-all duration-300 
+            className={`w-56 h-56 rounded-full flex items-center justify-center shadow-[0_0_50px_-10px_rgba(248,113,113,0.3)] transition-all duration-500 animate-fade-in
               ${isRecording 
-                ? 'bg-space-danger scale-110 shadow-[0_0_60px_-10px_rgba(248,113,113,0.6)] animate-pulse' 
-                : 'bg-gradient-to-br from-space-danger to-red-600 hover:scale-105 active:scale-95'
+                ? 'bg-destructive scale-110 shadow-[0_0_80px_-10px_rgba(248,113,113,0.6)] animate-pulse-slow' 
+                : 'bg-gradient-to-br from-destructive to-red-700 hover:scale-105 active:scale-95'
               }`}
           >
             <div className="text-center">
               {isRecording ? (
-                 <span className="text-white font-bold text-lg animate-bounce">Listening...</span>
+                 <span className="text-white font-bold text-2xl animate-pulse">Listening...</span>
               ) : (
                 <>
-                  <svg className="w-16 h-16 text-white mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
-                  <span className="text-white font-bold text-lg">Hold to Ask</span>
+                  <svg className="w-20 h-20 text-white mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
+                  <span className="text-white font-bold text-xl tracking-wider">Hold to Ask</span>
                 </>
               )}
             </div>
@@ -109,40 +107,54 @@ const SOSPage: React.FC = () => {
         )}
 
         {loading && (
-          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-space-accent"></div>
+           <div className="w-full max-w-md space-y-4 animate-fade-in">
+             <Skeleton className="h-32 w-full rounded-3xl" />
+             <div className="space-y-2">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+             </div>
+           </div>
         )}
 
         {result && (
-          <div className="w-full bg-space-800 rounded-2xl p-6 border border-space-700 shadow-xl animate-fade-in-up">
-            <div className="mb-4 text-slate-400 text-sm border-b border-space-700 pb-2">
-              You wanted to say: <span className="text-slate-200 italic">"{transcript}"</span>
-            </div>
-            
-            <div className="mb-6">
-              <h3 className="text-space-accent font-bold text-xs uppercase tracking-widest mb-1">Native Option</h3>
-              <p className="text-2xl text-white font-medium leading-relaxed">{result.native}</p>
-            </div>
+          <Card className="w-full border-none bg-card/80 backdrop-blur shadow-2xl animate-slide-up overflow-hidden ring-1 ring-white/10">
+            <CardContent className="p-8">
+              <div className="mb-6 text-muted-foreground text-sm border-b border-border pb-4 flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-destructive"></div>
+                <span>You wanted to say:</span> 
+                <span className="text-foreground italic font-medium">"{transcript}"</span>
+              </div>
+              
+              <div className="mb-8">
+                <h3 className="text-primary font-bold text-xs uppercase tracking-widest mb-2">Native Option</h3>
+                <p className="text-3xl text-foreground font-semibold leading-tight">{result.native}</p>
+              </div>
 
-            <div className="mb-6">
-               <h3 className="text-slate-500 font-bold text-xs uppercase tracking-widest mb-1">Why?</h3>
-               <p className="text-slate-300 text-sm">{result.explanation}</p>
-            </div>
+              <div className="mb-8">
+                 <h3 className="text-muted-foreground font-bold text-xs uppercase tracking-widest mb-2">Why?</h3>
+                 <p className="text-secondary-foreground text-base leading-relaxed">{result.explanation}</p>
+              </div>
 
-            <button 
-              onClick={() => speak(result.native)}
-              className="w-full py-3 bg-space-700 hover:bg-space-600 rounded-xl text-white font-semibold flex items-center justify-center space-x-2 transition-colors"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
-              <span>Listen Again</span>
-            </button>
-            
-            <button
-               onClick={() => { setResult(null); setTranscript(''); }}
-               className="w-full mt-3 py-3 text-slate-400 text-sm hover:text-white"
-            >
-              Ask Another
-            </button>
-          </div>
+              <div className="grid gap-3">
+                <Button 
+                  onClick={() => speak(result.native)}
+                  size="lg"
+                  className="w-full text-lg h-14"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
+                  Listen Again
+                </Button>
+                
+                <Button
+                   variant="ghost"
+                   onClick={() => { setResult(null); setTranscript(''); }}
+                   className="w-full text-muted-foreground hover:text-foreground"
+                >
+                  Ask Another
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>
