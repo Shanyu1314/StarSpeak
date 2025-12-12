@@ -1,7 +1,0 @@
-{
-  "name": "StarSpeak",
-  "description": "A battle-hardened, local-first English speaking trainer. Focus on high frequency and repetition.",
-  "requestFramePermissions": [
-    "microphone"
-  ]
-}
