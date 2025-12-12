@@ -20,7 +20,7 @@ exports.handler = async (event) => {
   try {
     const { action, payload } = JSON.parse(event.body);
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     let result;
 
@@ -57,7 +57,6 @@ exports.handler = async (event) => {
         `;
         const response = await model.generateContent(prompt);
         const text = response.response.text();
-        // 提取 JSON
         const jsonMatch = text.match(/\{[\s\S]*\}/);
         result = jsonMatch ? JSON.parse(jsonMatch[0]) : {};
         break;
@@ -76,14 +75,25 @@ exports.handler = async (event) => {
       }
 
       case "freetalk": {
+        // 构建对话历史
+        const historyFormatted = payload.history.slice(0, -1).map(msg => ({
+          role: msg.role === "user" ? "user" : "model",
+          parts: [{ text: msg.parts[0].text }],
+        }));
+        
         const chat = model.startChat({
-          history: payload.history.map(msg => ({
-            role: msg.role,
-            parts: msg.parts,
-          })),
-          systemInstruction: "You are an empathetic English conversation partner. You are kind, patient, and encouraging. You do not correct every mistake, but focus on keeping the conversation flowing. Keep your responses short (under 2 sentences) to encourage the user to speak more.",
+          history: historyFormatted,
         });
-        const response = await chat.sendMessage(payload.message);
+        
+        // 添加系统提示到用户消息
+        const systemPrompt = "You are an empathetic English conversation partner. Be kind, patient, and encouraging. Don't correct every mistake, focus on keeping the conversation flowing. Keep responses short (under 2 sentences).";
+        const userMessage = payload.message;
+        
+        const response = await chat.sendMessage(
+          historyFormatted.length === 0 
+            ? `${systemPrompt}\n\nUser: ${userMessage}` 
+            : userMessage
+        );
         result = { text: response.response.text() };
         break;
       }
