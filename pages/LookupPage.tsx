@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { aiLookupWord } from '../services/gemini';
+import { lookupWordInDatabase } from '../services/dictionary';
 import { getWord, saveWord, toggleDrillStatus, getRecentWords, deleteWord } from '../services/storage';
 import { WordEntry } from '../types';
 import { Input } from '../components/ui/input';
@@ -39,11 +40,24 @@ const LookupPage: React.FC = () => {
     setQuery(targetWord);
 
     try {
+      // 1. 先检查本地历史记录
       const localData = await getWord(targetWord);
-      
       if (localData) {
         setResult(localData);
+        setLoading(false);
+        return;
+      }
+
+      // 2. 从 ECDICT 数据库查询
+      const dictData = await lookupWordInDatabase(targetWord);
+
+      if (dictData) {
+        setResult(dictData);
+        // 保存到本地历史记录
+        await saveWord(dictData);
+        await loadHistory();
       } else {
+        // 3. 数据库中没有，使用 AI 查询
         const aiData = await aiLookupWord(targetWord);
         setResult(aiData);
         await saveWord(aiData);
@@ -51,6 +65,7 @@ const LookupPage: React.FC = () => {
       }
     } catch (err) {
       setError("Could not find definition. Check connection.");
+      console.error('Search error:', err);
     } finally {
       setLoading(false);
     }
