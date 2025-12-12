@@ -75,19 +75,46 @@ exports.handler = async (event) => {
       }
 
       case "freetalk": {
-        // 构建对话历史
-        const historyFormatted = payload.history.slice(0, -1).map(msg => ({
-          role: msg.role === "user" ? "user" : "model",
-          parts: [{ text: msg.parts[0].text }],
-        }));
+        const systemPrompt = "You are an empathetic English conversation partner. Be kind, patient, and encouraging. Don't correct every mistake, focus on keeping the conversation flowing. Keep responses short (under 2 sentences).";
+        const userMessage = payload.message;
+        
+        // 过滤并格式化历史记录，确保格式正确
+        const rawHistory = payload.history.slice(0, -1);
+        
+        // 如果没有历史记录，直接用 generateContent
+        if (rawHistory.length === 0) {
+          const response = await model.generateContent(`${systemPrompt}\n\nUser: ${userMessage}`);
+          result = { text: response.response.text() };
+          break;
+        }
+        
+        // 构建有效的对话历史，确保以 user 开始且交替出现
+        const historyFormatted = [];
+        for (const msg of rawHistory) {
+          const role = msg.role === "user" ? "user" : "model";
+          const text = msg.parts?.[0]?.text || "";
+          if (!text) continue;
+          
+          // 确保交替：如果当前角色和上一个相同，跳过
+          if (historyFormatted.length > 0 && historyFormatted[historyFormatted.length - 1].role === role) {
+            continue;
+          }
+          historyFormatted.push({ role, parts: [{ text }] });
+        }
+        
+        // 确保历史以 user 开始
+        if (historyFormatted.length > 0 && historyFormatted[0].role !== "user") {
+          historyFormatted.shift();
+        }
+        
+        // 确保历史以 model 结束（因为下一条是 user 发送的）
+        if (historyFormatted.length > 0 && historyFormatted[historyFormatted.length - 1].role === "user") {
+          historyFormatted.pop();
+        }
         
         const chat = model.startChat({
           history: historyFormatted,
         });
-        
-        // 添加系统提示到用户消息
-        const systemPrompt = "You are an empathetic English conversation partner. Be kind, patient, and encouraging. Don't correct every mistake, focus on keeping the conversation flowing. Keep responses short (under 2 sentences).";
-        const userMessage = payload.message;
         
         const response = await chat.sendMessage(
           historyFormatted.length === 0 
