@@ -19,27 +19,77 @@ const DumbbellIcon = ({ className }: {className?: string}) => <svg className={cl
 const NavBar = () => {
   const navClass = ({ isActive }: { isActive: boolean }) =>
     cn(
-      "flex flex-col items-center justify-center w-full h-full transition-all duration-300 rounded-lg mx-1",
-      isActive ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground hover:bg-muted/20'
+      "flex flex-col items-center justify-center gap-1 px-4 py-3 transition-all duration-200 rounded-xl relative",
+      isActive
+        ? 'text-sky-600'
+        : 'text-slate-400 hover:text-slate-600'
     );
 
   return (
-    <nav className="h-20 bg-card/80 backdrop-blur-lg border-t border-border flex justify-around items-center z-50 shrink-0 pb-safe px-2 pb-2">
+    <nav className="h-24 bg-white/95 backdrop-blur-xl border-t-2 border-border flex justify-around items-center z-50 shrink-0 pb-safe px-4 shadow-lg">
       <NavLink to={AppRoute.HOME} className={navClass}>
-        <div className="p-1"><SOSIcon className="w-6 h-6" /></div>
-        <span className="text-[10px] font-bold tracking-wider">SOS</span>
+        {({ isActive }) => (
+          <>
+            <div className={cn(
+              "w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200",
+              isActive
+                ? 'bg-gradient-to-br from-rose-500 to-orange-500 shadow-lg scale-110'
+                : 'bg-slate-100 hover:bg-slate-200'
+            )}>
+              <SOSIcon className={cn("w-6 h-6", isActive ? "text-white" : "")} />
+            </div>
+            <span className="text-xs font-semibold">SOS</span>
+            {isActive && <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-rose-500 to-orange-500 rounded-full"></div>}
+          </>
+        )}
       </NavLink>
       <NavLink to={AppRoute.LOOKUP} className={navClass}>
-        <div className="p-1"><BookIcon className="w-6 h-6" /></div>
-        <span className="text-[10px] font-bold tracking-wider">LOOKUP</span>
+        {({ isActive }) => (
+          <>
+            <div className={cn(
+              "w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200",
+              isActive
+                ? 'bg-gradient-to-br from-sky-500 to-cyan-500 shadow-lg scale-110'
+                : 'bg-slate-100 hover:bg-slate-200'
+            )}>
+              <BookIcon className={cn("w-6 h-6", isActive ? "text-white" : "")} />
+            </div>
+            <span className="text-xs font-semibold">查词</span>
+            {isActive && <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-sky-500 to-cyan-500 rounded-full"></div>}
+          </>
+        )}
       </NavLink>
       <NavLink to={AppRoute.DRILL} className={navClass}>
-        <div className="p-1"><DumbbellIcon className="w-6 h-6" /></div>
-        <span className="text-[10px] font-bold tracking-wider">DRILL</span>
+        {({ isActive }) => (
+          <>
+            <div className={cn(
+              "w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200",
+              isActive
+                ? 'bg-gradient-to-br from-purple-500 to-pink-500 shadow-lg scale-110'
+                : 'bg-slate-100 hover:bg-slate-200'
+            )}>
+              <DumbbellIcon className={cn("w-6 h-6", isActive ? "text-white" : "")} />
+            </div>
+            <span className="text-xs font-semibold">练习</span>
+            {isActive && <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>}
+          </>
+        )}
       </NavLink>
       <NavLink to={AppRoute.TALK} className={navClass}>
-        <div className="p-1"><ChatIcon className="w-6 h-6" /></div>
-        <span className="text-[10px] font-bold tracking-wider">TALK</span>
+        {({ isActive }) => (
+          <>
+            <div className={cn(
+              "w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200",
+              isActive
+                ? 'bg-gradient-to-br from-blue-500 to-indigo-500 shadow-lg scale-110'
+                : 'bg-slate-100 hover:bg-slate-200'
+            )}>
+              <ChatIcon className={cn("w-6 h-6", isActive ? "text-white" : "")} />
+            </div>
+            <span className="text-xs font-semibold">对话</span>
+            {isActive && <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"></div>}
+          </>
+        )}
       </NavLink>
     </nav>
   );
@@ -57,13 +107,16 @@ const UserBar = () => {
   if (!user) return null;
 
   return (
-    <div className="h-12 bg-card/80 backdrop-blur-lg border-b border-border flex justify-between items-center px-4 shrink-0">
-      <div className="text-xs text-muted-foreground">
-        {user.email}
+    <div className="h-14 bg-white/95 backdrop-blur-xl border-b-2 border-border flex justify-between items-center px-6 shrink-0 shadow-sm">
+      <div className="flex items-center gap-3">
+        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-cyan-500 flex items-center justify-center text-white font-bold text-sm">
+          {user.email?.[0].toUpperCase()}
+        </div>
+        <span className="text-sm font-medium text-foreground">{user.email}</span>
       </div>
       <button
         onClick={handleLogout}
-        className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+        className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all duration-200"
       >
         登出
       </button>

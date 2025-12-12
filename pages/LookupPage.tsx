@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { lookupWord, LookupMode } from '../services/unified-dictionary';
 import { getWord, saveWord, toggleDrillStatus, getRecentWords, deleteWord } from '../services/storage';
 import { WordEntry } from '../types';
-import { Input } from '../components/ui/input';
+import { SearchBar } from '../components/ui/search-bar';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { Skeleton } from '../components/ui/skeleton';
+import { Badge } from '../components/ui/badge';
+import { LoadingSpinner } from '../components/ui/loading-spinner';
 import { cn } from '../lib/utils';
 
 const LookupPage: React.FC = () => {
@@ -101,147 +103,199 @@ const LookupPage: React.FC = () => {
   };
 
   return (
-    <div className="h-full flex flex-col bg-background">
-      {/* Search Bar */}
-      <div className="p-4 bg-background/80 backdrop-blur-md border-b border-border sticky top-0 z-20">
-        <div className="max-w-2xl mx-auto space-y-3">
-          {/* Mode Toggle */}
-          <div className="flex gap-2 justify-center">
-            <Button
+    <div className="h-full flex flex-col">
+      {/* Header with Search Bar */}
+      <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-border shadow-sm">
+        <div className="max-w-4xl mx-auto px-4 py-4 space-y-4">
+          {/* Mode Toggle Pills */}
+          <div className="flex gap-3 justify-center">
+            <button
               type="button"
-              variant={lookupMode === 'ai' ? 'default' : 'outline'}
-              size="sm"
               onClick={() => setLookupMode('ai')}
-              className="flex-1 max-w-[200px] rounded-xl transition-all"
+              className={cn(
+                "flex items-center gap-2 px-6 py-2.5 rounded-full font-medium transition-all duration-200",
+                lookupMode === 'ai'
+                  ? "bg-gradient-to-r from-sky-500 to-cyan-500 text-white shadow-lg shadow-sky-500/30 scale-105"
+                  : "bg-white border-2 border-border text-foreground hover:border-sky-300 hover:bg-sky-50"
+              )}
             >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-              AI 查词
-            </Button>
-            <Button
+              <span>AI 智能</span>
+            </button>
+            <button
               type="button"
-              variant={lookupMode === 'offline' ? 'default' : 'outline'}
-              size="sm"
               onClick={() => setLookupMode('offline')}
-              className="flex-1 max-w-[200px] rounded-xl transition-all"
+              className={cn(
+                "flex items-center gap-2 px-6 py-2.5 rounded-full font-medium transition-all duration-200",
+                lookupMode === 'offline'
+                  ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/30 scale-105"
+                  : "bg-white border-2 border-border text-foreground hover:border-emerald-300 hover:bg-emerald-50"
+              )}
             >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
-              离线查词
-            </Button>
+              <span>离线词典</span>
+            </button>
           </div>
 
-          {/* Search Input */}
-          <form onSubmit={(e) => handleSearch(e)} className="relative flex gap-2">
-            <Input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={lookupMode === 'ai' ? "AI智能查词..." : "离线词典查询..."}
-              className="text-lg h-14 pl-5 shadow-sm rounded-2xl border-border bg-card focus-visible:ring-primary"
-            />
-            <Button
-              type="submit"
-              size="icon"
-              className="h-14 w-14 rounded-2xl shrink-0"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-            </Button>
-          </form>
+          {/* Search Bar */}
+          <SearchBar
+            value={query}
+            onChange={setQuery}
+            onSubmit={(word) => handleSearch(undefined, word)}
+            placeholder={lookupMode === 'ai' ? "输入单词，AI 智能查询..." : "输入单词，离线查询..."}
+            suggestions={history.slice(0, 5).map(w => w.word)}
+          />
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto no-scrollbar pb-20">
-        
+
         {loading && (
-          <div className="p-6 max-w-2xl mx-auto space-y-6 animate-fade-in">
-             <Skeleton className="h-64 w-full rounded-3xl" />
-             <Skeleton className="h-32 w-full rounded-3xl" />
+          <div className="p-6 max-w-4xl mx-auto space-y-6 animate-fade-in">
+            <LoadingSpinner size="xl" text="正在查询..." className="py-20" />
+            <div className="space-y-4">
+              <Skeleton className="h-48 w-full rounded-3xl" />
+              <Skeleton className="h-32 w-full rounded-3xl" />
+            </div>
           </div>
         )}
 
         {error && (
           <div className="flex flex-col items-center justify-center mt-20 p-6 text-center animate-fade-in">
-            <div className="text-destructive text-5xl mb-4">!</div>
-            <p className="text-destructive text-lg font-medium">{error}</p>
+            <div className="w-20 h-20 rounded-full bg-rose-100 flex items-center justify-center mb-4">
+              <svg className="w-10 h-10 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <p className="text-rose-600 text-lg font-semibold mb-2">查询失败</p>
+            <p className="text-muted-foreground">{error}</p>
           </div>
         )}
 
         {/* Result View */}
         {result && !loading && (
-          <div className="p-6 max-w-2xl mx-auto space-y-6 animate-slide-up">
-            
-            {/* Word Header Card */}
-            <Card className="rounded-3xl border-border bg-card shadow-xl overflow-hidden relative group">
-              <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none transition-all group-hover:bg-primary/20"></div>
-              
-              <div className="p-6 flex justify-between items-start relative z-10">
-                <div className="space-y-2 flex-1 mr-4">
-                  <h1 className={cn("font-extrabold text-foreground tracking-tight break-words", result.word.length > 20 ? 'text-2xl' : 'text-4xl')}>
-                    {result.word}
-                  </h1>
-                  
-                  {result.phonetic ? (
-                    <div className="flex items-center space-x-3 text-primary mt-2">
-                      <span className="font-mono text-lg opacity-80 bg-primary/10 px-2 py-1 rounded">/{result.phonetic}/</span>
-                      <Button variant="ghost" size="icon" onClick={() => speak(result.word)} className="rounded-full">
-                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
-                      </Button>
-                    </div>
-                  ) : (
-                     <Button variant="ghost" onClick={() => speak(result.word)} className="text-primary mt-2 pl-0 hover:bg-transparent hover:text-primary/80">
-                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
-                         Play Audio
-                      </Button>
-                  )}
-                </div>
-                
-                <Button
-                  onClick={handleToggleDrill}
-                  variant={result.inDrill ? "default" : "secondary"}
-                  className={cn("flex flex-col h-16 w-16 rounded-2xl transition-all", result.inDrill && "shadow-lg shadow-primary/30")}
-                >
-                  <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-                  <span className="text-[10px] font-bold uppercase">{result.inDrill ? 'ON' : 'OFF'}</span>
-                </Button>
-              </div>
+          <div className="p-6 max-w-4xl mx-auto space-y-6 animate-slide-up">
 
-              <div className="p-6 pt-2 border-t border-border/50">
-                <p className="text-2xl text-foreground font-bold mb-2 break-words">{result.translation_cn}</p>
-                <p className="text-muted-foreground leading-relaxed text-base">{result.definition}</p>
+            {/* Word Header Card - Premium Design */}
+            <Card className="rounded-3xl border-2 border-border bg-gradient-to-br from-white to-slate-50 shadow-2xl overflow-hidden relative group hover:shadow-3xl transition-all duration-300">
+              {/* Decorative top bar */}
+              <div className="h-2 bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500"></div>
+
+              {/* Floating decoration */}
+              <div className="absolute top-10 right-10 w-64 h-64 bg-gradient-to-br from-sky-400/10 to-cyan-400/10 rounded-full blur-3xl pointer-events-none group-hover:scale-110 transition-transform duration-500"></div>
+
+              <div className="p-8 relative z-10">
+                <div className="flex justify-between items-start mb-6">
+                  <div className="flex-1 space-y-3 mr-6">
+                    <div className="flex items-center gap-3">
+                      <h1 className={cn("font-extrabold text-foreground tracking-tight", result.word.length > 20 ? 'text-3xl' : 'text-5xl')}>
+                        {result.word}
+                      </h1>
+                      <Badge variant="primary" size="sm" className="ml-2">
+                        {lookupMode === 'ai' ? 'AI' : '离线'}
+                      </Badge>
+                    </div>
+
+                    {result.phonetic && (
+                      <div className="flex items-center gap-3">
+                        <span className="font-mono text-xl text-primary bg-sky-100 px-4 py-2 rounded-xl">
+                          /{result.phonetic}/
+                        </span>
+                        <button
+                          onClick={() => speak(result.word)}
+                          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-cyan-500 text-white hover:shadow-lg hover:scale-105 transition-all duration-200"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                          </svg>
+                          <span className="text-sm font-medium">发音</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Drill Toggle */}
+                  <button
+                    onClick={handleToggleDrill}
+                    className={cn(
+                      "flex flex-col items-center gap-2 px-6 py-4 rounded-2xl transition-all duration-200 shadow-lg",
+                      result.inDrill
+                        ? "bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-emerald-500/30 scale-105"
+                        : "bg-white border-2 border-border text-muted-foreground hover:border-emerald-400"
+                    )}
+                  >
+                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                    <span className="text-xs font-bold">{result.inDrill ? '已加入' : '加入练习'}</span>
+                  </button>
+                </div>
+
+                {/* Translation & Definition */}
+                <div className="bg-gradient-to-br from-sky-50 to-cyan-50 rounded-2xl p-6 space-y-3">
+                  <div>
+                    <p className="text-xs font-semibold text-sky-600 uppercase tracking-wide mb-2">中文释义</p>
+                    <p className="text-3xl text-foreground font-bold">{result.translation_cn}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-cyan-600 uppercase tracking-wide mb-2">英文释义</p>
+                    <p className="text-lg text-muted-foreground leading-relaxed">{result.definition}</p>
+                  </div>
+                </div>
               </div>
             </Card>
 
             {/* Example Card */}
-            <Card className="rounded-3xl border-border bg-card shadow-lg">
-              <CardContent className="p-6">
-                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">Context</h3>
-                <div className="flex items-start gap-4">
-                  <p className="text-lg text-secondary-foreground italic leading-relaxed flex-1 break-words">"{result.example}"</p>
-                  <Button size="icon" variant="secondary" onClick={() => speak(result.example)} className="shrink-0 rounded-full h-10 w-10">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                  </Button>
+            <Card className="rounded-3xl border-2 border-border bg-white shadow-xl hover:shadow-2xl transition-all duration-300">
+              <CardContent className="p-8">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-amber-400 flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">例句</h3>
+                </div>
+                <div className="flex items-start gap-4 bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-6">
+                  <p className="text-xl text-foreground italic leading-relaxed flex-1">"{result.example}"</p>
+                  <button
+                    onClick={() => speak(result.example)}
+                    className="shrink-0 w-12 h-12 rounded-full bg-gradient-to-r from-orange-400 to-amber-400 text-white hover:shadow-lg hover:scale-110 transition-all duration-200 flex items-center justify-center"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </button>
                 </div>
               </CardContent>
             </Card>
 
-            <div className="grid grid-cols-2 gap-3">
-              <Button 
-                variant="ghost"
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
                 onClick={() => {setResult(null); setQuery('');}}
-                className="h-12 text-muted-foreground hover:text-foreground"
+                className="flex-1 h-14 text-base rounded-2xl border-2 hover:bg-slate-50"
               >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
                 返回列表
               </Button>
-              <Button 
+              <Button
                 variant="destructive"
                 onClick={handleDelete}
-                className="h-12"
+                className="h-14 px-6 text-base rounded-2xl shadow-lg hover:shadow-xl"
               >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                删除单词
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                删除
               </Button>
             </div>
           </div>
@@ -249,29 +303,64 @@ const LookupPage: React.FC = () => {
 
         {/* History List */}
         {!result && !loading && (
-          <div className="max-w-2xl mx-auto p-4 animate-fade-in">
-            <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4 ml-2">Recent Discoveries</h2>
-            
+          <div className="max-w-4xl mx-auto p-6 animate-fade-in">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-foreground">最近查询</h2>
+                  <p className="text-sm text-muted-foreground">{history.length} 个单词</p>
+                </div>
+              </div>
+            </div>
+
             {history.length === 0 ? (
-              <div className="text-center py-20 opacity-50 flex flex-col items-center">
-                <svg className="w-16 h-16 mb-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
-                <p>No words yet.</p>
+              <div className="text-center py-32 flex flex-col items-center">
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center mb-6 animate-float">
+                  <svg className="w-16 h-16 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                </div>
+                <p className="text-lg font-medium text-muted-foreground mb-2">还没有查询记录</p>
+                <p className="text-sm text-muted-foreground">开始搜索单词，建立你的词汇库</p>
               </div>
             ) : (
-              <div className="grid gap-2">
+              <div className="grid gap-3">
                 {history.map((item, idx) => (
-                  <div 
+                  <div
                     key={`${item.word}-${idx}`}
                     onClick={() => { setResult(item); setQuery(item.word); }}
-                    className="group bg-card hover:bg-accent/10 active:scale-[0.99] transition-all p-4 rounded-xl border border-border flex justify-between items-center cursor-pointer shadow-sm"
+                    className="group relative bg-white hover:bg-gradient-to-r hover:from-sky-50 hover:to-cyan-50 active:scale-[0.98] transition-all duration-200 p-5 rounded-2xl border-2 border-border hover:border-sky-300 flex justify-between items-center cursor-pointer shadow-md hover:shadow-xl"
                   >
-                    <div className="flex-1 min-w-0 pr-4">
-                      <span className="text-foreground font-bold text-lg mr-3 block truncate group-hover:text-primary transition-colors">{item.word}</span>
-                      <span className="text-muted-foreground text-sm block truncate">{item.translation_cn}</span>
+                    {/* Drill indicator dot */}
+                    {item.inDrill && (
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-12 bg-gradient-to-b from-emerald-500 to-teal-500 rounded-r-full"></div>
+                    )}
+
+                    <div className="flex items-center gap-4 flex-1 min-w-0 pl-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xl font-bold text-foreground group-hover:text-sky-600 transition-colors truncate">
+                            {item.word}
+                          </span>
+                          {item.inDrill && (
+                            <Badge variant="success" size="sm">练习中</Badge>
+                          )}
+                        </div>
+                        <span className="text-sm text-muted-foreground block truncate">{item.translation_cn}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-3 shrink-0">
-                      {item.inDrill && <span className="w-2.5 h-2.5 rounded-full bg-primary shadow-sm shadow-primary/50"></span>}
-                      <svg className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+
+                    <div className="shrink-0 ml-4">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 group-hover:from-sky-100 group-hover:to-cyan-100 flex items-center justify-center transition-all duration-200 group-hover:scale-110">
+                        <svg className="w-5 h-5 text-muted-foreground group-hover:text-sky-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
                     </div>
                   </div>
                 ))}

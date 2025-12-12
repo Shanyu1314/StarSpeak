@@ -88,38 +88,57 @@
       }
     </script>
     <style>
-      :root {
-        --background: 222 47% 11%;
-        --foreground: 210 40% 98%;
-        
-        --card: 222 47% 14%;
-        --card-foreground: 210 40% 98%;
-        
-        --popover: 222 47% 11%;
-        --popover-foreground: 210 40% 98%;
-        
-        --primary: 199 89% 48%; /* Sky 500 equivalent approx */
-        --primary-foreground: 222 47% 11%;
-        
-        --secondary: 217 33% 17%;
-        --secondary-foreground: 210 40% 98%;
-        
-        --muted: 217 33% 17%;
-        --muted-foreground: 215 20% 65%;
-        
-        --accent: 217 33% 17%;
-        --accent-foreground: 210 40% 98%;
-        
-        --destructive: 0 63% 31%;
-        --destructive-foreground: 210 40% 98%;
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap');
 
-        --border: 217 33% 20%;
-        --input: 217 33% 20%;
-        --ring: 212.7 26.8% 83.9%;
+      :root {
+        /* Light Theme - Bright & Fresh */
+        --background: 210 40% 98%;  /* #F8FAFC */
+        --foreground: 222 47% 11%;  /* #0F172A */
+
+        --card: 0 0% 100%;  /* #FFFFFF */
+        --card-foreground: 222 47% 11%;
+
+        --popover: 0 0% 100%;
+        --popover-foreground: 222 47% 11%;
+
+        --primary: 199 89% 48%;  /* #0EA5E9 Sky 500 */
+        --primary-foreground: 0 0% 100%;
+
+        --secondary: 210 40% 96%;  /* #F1F5F9 */
+        --secondary-foreground: 222 47% 11%;
+
+        --muted: 210 40% 96%;
+        --muted-foreground: 215 16% 47%;  /* #64748B */
+
+        --accent: 188 91% 44%;  /* #06B6D4 Cyan 500 */
+        --accent-foreground: 0 0% 100%;
+
+        --success: 160 84% 39%;  /* #10B981 Emerald 500 */
+        --warning: 25 95% 62%;  /* #FB923C Orange 400 */
+        --destructive: 350 89% 60%;  /* #F43F5E Rose 500 */
+        --destructive-foreground: 0 0% 100%;
+
+        --border: 214 32% 91%;  /* #E2E8F0 */
+        --input: 214 32% 91%;
+        --ring: 199 89% 48%;
+
+        /* Custom colors */
+        --glow-sky: rgba(14, 165, 233, 0.15);
+        --glow-cyan: rgba(6, 182, 212, 0.15);
       }
-      
+
+      * {
+        box-sizing: border-box;
+      }
+
       body {
-        background-color: hsl(var(--background));
+        margin: 0;
+        padding: 0;
+        font-family: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        background: linear-gradient(135deg, #EFF6FF 0%, #F0FDFA 50%, #ECFDF5 100%);
+        background-attachment: fixed;
         color: hsl(var(--foreground));
       }
 
@@ -129,12 +148,41 @@
       }
       /* Hide scrollbar for IE, Edge and Firefox */
       .no-scrollbar {
-        -ms-overflow-style: none;  /* IE and Edge */
-        scrollbar-width: none;  /* Firefox */
+        -ms-overflow-style: none;
+        scrollbar-width: none;
       }
-      
+
       .safe-area-pb {
         padding-bottom: env(safe-area-inset-bottom);
+      }
+
+      /* Custom animations */
+      @keyframes glow {
+        0%, 100% { box-shadow: 0 0 20px var(--glow-sky); }
+        50% { box-shadow: 0 0 30px var(--glow-cyan); }
+      }
+
+      .animate-glow {
+        animation: glow 3s ease-in-out infinite;
+      }
+
+      @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+      }
+
+      .animate-float {
+        animation: float 6s ease-in-out infinite;
+      }
+
+      /* Focus glow effect */
+      .focus-glow:focus-within {
+        box-shadow: 0 0 0 3px var(--glow-sky), 0 10px 30px rgba(14, 165, 233, 0.2);
+      }
+
+      /* Smooth transitions */
+      .transition-smooth {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
     </style>
   <script type="importmap">
