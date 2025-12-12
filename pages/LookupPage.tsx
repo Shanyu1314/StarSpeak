@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { aiLookupWord } from '../services/gemini';
-import { getWord, saveWord, toggleDrillStatus, getRecentWords } from '../services/storage';
+import { getWord, saveWord, toggleDrillStatus, getRecentWords, deleteWord } from '../services/storage';
 import { WordEntry } from '../types';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
@@ -62,6 +62,20 @@ const LookupPage: React.FC = () => {
     await toggleDrillStatus(result.word, newStatus);
     setResult({ ...result, inDrill: newStatus });
     setHistory(prev => prev.map(w => w.word === result.word ? { ...w, inDrill: newStatus } : w));
+  };
+
+  const handleDelete = async () => {
+    if (!result) return;
+    if (!confirm(`确定要删除单词 "${result.word}" 吗?`)) return;
+    
+    try {
+      await deleteWord(result.word);
+      setResult(null);
+      setQuery('');
+      await loadHistory();
+    } catch (err) {
+      console.error('删除失败:', err);
+    }
   };
 
   const speak = (text: string) => {
@@ -168,13 +182,23 @@ const LookupPage: React.FC = () => {
               </CardContent>
             </Card>
 
-            <Button 
-              variant="ghost"
-              onClick={() => {setResult(null); setQuery('');}}
-              className="w-full h-12 text-muted-foreground hover:text-foreground"
-            >
-              Close & Back to History
-            </Button>
+            <div className="grid grid-cols-2 gap-3">
+              <Button 
+                variant="ghost"
+                onClick={() => {setResult(null); setQuery('');}}
+                className="h-12 text-muted-foreground hover:text-foreground"
+              >
+                返回列表
+              </Button>
+              <Button 
+                variant="destructive"
+                onClick={handleDelete}
+                className="h-12"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                删除单词
+              </Button>
+            </div>
           </div>
         )}
 

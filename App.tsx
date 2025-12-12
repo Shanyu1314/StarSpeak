@@ -1,11 +1,13 @@
 import React from 'react';
-import { HashRouter, Routes, Route, NavLink, useLocation } from 'react-router-dom';
+import { HashRouter, Routes, Route, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { AppRoute } from './types';
 import LookupPage from './pages/LookupPage';
 import SOSPage from './pages/SOSPage';
 import FreeTalkPage from './pages/FreeTalkPage';
 import LoopDrillPage from './pages/LoopDrillPage';
 import AuthPage from './pages/AuthPage';
+import { AuthGuard } from './components/auth/AuthGuard';
+import { useAuth } from './src/hooks/useAuth';
 import { cn } from './lib/utils';
 
 // Icons
@@ -43,12 +45,39 @@ const NavBar = () => {
   );
 };
 
+const UserBar = () => {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/auth');
+  };
+
+  if (!user) return null;
+
+  return (
+    <div className="h-12 bg-card/80 backdrop-blur-lg border-b border-border flex justify-between items-center px-4 shrink-0">
+      <div className="text-xs text-muted-foreground">
+        {user.email}
+      </div>
+      <button
+        onClick={handleLogout}
+        className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+      >
+        登出
+      </button>
+    </div>
+  );
+};
+
 const Layout = ({ children }: { children: React.ReactNode }) => {
     const location = useLocation();
     const isAuthPage = location.pathname === '/auth';
     
     return (
         <div className="flex flex-col h-full bg-background text-foreground">
+            {!isAuthPage && <UserBar />}
             <main className="flex-1 overflow-y-auto overflow-x-hidden relative scroll-smooth no-scrollbar">
                 {children}
             </main>
@@ -62,10 +91,10 @@ const App = () => {
     <HashRouter>
         <Layout>
           <Routes>
-            <Route path={AppRoute.HOME} element={<SOSPage />} />
-            <Route path={AppRoute.LOOKUP} element={<LookupPage />} />
-            <Route path={AppRoute.DRILL} element={<LoopDrillPage />} />
-            <Route path={AppRoute.TALK} element={<FreeTalkPage />} />
+            <Route path={AppRoute.HOME} element={<AuthGuard><SOSPage /></AuthGuard>} />
+            <Route path={AppRoute.LOOKUP} element={<AuthGuard><LookupPage /></AuthGuard>} />
+            <Route path={AppRoute.DRILL} element={<AuthGuard><LoopDrillPage /></AuthGuard>} />
+            <Route path={AppRoute.TALK} element={<AuthGuard><FreeTalkPage /></AuthGuard>} />
             <Route path="/auth" element={<AuthPage />} />
           </Routes>
         </Layout>

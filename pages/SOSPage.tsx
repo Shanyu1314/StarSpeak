@@ -1,12 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { IWindow } from '../types';
 import { aiSOSResponse } from '../services/gemini';
 import { saveSOSScenario } from '../services/storage';
+import { useAuth } from '../src/hooks/useAuth';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { Skeleton } from '../components/ui/skeleton';
 
 const SOSPage: React.FC = () => {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/auth');
+  };
+
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [result, setResult] = useState<{ native: string; explanation: string } | null>(null);
@@ -74,10 +84,25 @@ const SOSPage: React.FC = () => {
     <div className="min-h-full flex flex-col p-6 bg-gradient-to-b from-background to-secondary/20">
       
       <header className="mb-10 mt-6 animate-slide-up">
-        <h1 className="text-4xl font-extrabold tracking-tight">
-          Scene <span className="text-destructive">SOS</span>
-        </h1>
-        <p className="text-muted-foreground mt-2 font-medium">Stuck? Say it in Chinese.</p>
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-4xl font-extrabold tracking-tight">
+              Scene <span className="text-destructive">SOS</span>
+            </h1>
+            <p className="text-muted-foreground mt-2 font-medium">Stuck? Say it in Chinese.</p>
+          </div>
+          <div className="text-right">
+            <p className="text-xs text-muted-foreground mb-2">{user?.email}</p>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleLogout}
+              className="text-xs"
+            >
+              登出
+            </Button>
+          </div>
+        </div>
       </header>
 
       {/* Main Interaction Area */}
