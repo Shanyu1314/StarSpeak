@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { aiLookupWord } from '../services/gemini';
-import { lookupWordInDatabase } from '../services/dictionary';
+import { lookupWord, LookupMode } from '../services/unified-dictionary';
 import { getWord, saveWord, toggleDrillStatus, getRecentWords, deleteWord } from '../services/storage';
 import { WordEntry } from '../types';
 import { Input } from '../components/ui/input';
@@ -15,6 +14,7 @@ const LookupPage: React.FC = () => {
   const [history, setHistory] = useState<WordEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [lookupMode, setLookupMode] = useState<LookupMode>('ai');
 
   useEffect(() => {
     loadHistory();
@@ -48,23 +48,22 @@ const LookupPage: React.FC = () => {
         return;
       }
 
-      // 2. 从 ECDICT 数据库查询
-      const dictData = await lookupWordInDatabase(targetWord);
+      // 2. 使用统一查询服务（根据模式查询）
+      const dictData = await lookupWord(targetWord, lookupMode);
 
       if (dictData) {
         setResult(dictData);
-        // 保存到本地历史记录
         await saveWord(dictData);
         await loadHistory();
       } else {
-        // 3. 数据库中没有，使用 AI 查询
-        const aiData = await aiLookupWord(targetWord);
-        setResult(aiData);
-        await saveWord(aiData);
-        await loadHistory();
+        if (lookupMode === 'offline') {
+          setError("离线模式下未找到该单词。请切换到AI模式或尝试其他单词。");
+        } else {
+          setError("无法查询该单词，请检查网络连接。");
+        }
       }
     } catch (err) {
-      setError("Could not find definition. Check connection.");
+      setError("查询失败，请检查网络连接。");
       console.error('Search error:', err);
     } finally {
       setLoading(false);
@@ -105,22 +104,53 @@ const LookupPage: React.FC = () => {
     <div className="h-full flex flex-col bg-background">
       {/* Search Bar */}
       <div className="p-4 bg-background/80 backdrop-blur-md border-b border-border sticky top-0 z-20">
-        <form onSubmit={(e) => handleSearch(e)} className="relative max-w-2xl mx-auto flex gap-2">
-          <Input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Lightning Lookup..."
-            className="text-lg h-14 pl-5 shadow-sm rounded-2xl border-border bg-card focus-visible:ring-primary"
-          />
-          <Button 
-            type="submit"
-            size="icon"
-            className="h-14 w-14 rounded-2xl shrink-0"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-          </Button>
-        </form>
+        <div className="max-w-2xl mx-auto space-y-3">
+          {/* Mode Toggle */}
+          <div className="flex gap-2 justify-center">
+            <Button
+              type="button"
+              variant={lookupMode === 'ai' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setLookupMode('ai')}
+              className="flex-1 max-w-[200px] rounded-xl transition-all"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              AI 查词
+            </Button>
+            <Button
+              type="button"
+              variant={lookupMode === 'offline' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setLookupMode('offline')}
+              className="flex-1 max-w-[200px] rounded-xl transition-all"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+              离线查词
+            </Button>
+          </div>
+
+          {/* Search Input */}
+          <form onSubmit={(e) => handleSearch(e)} className="relative flex gap-2">
+            <Input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={lookupMode === 'ai' ? "AI智能查词..." : "离线词典查询..."}
+              className="text-lg h-14 pl-5 shadow-sm rounded-2xl border-border bg-card focus-visible:ring-primary"
+            />
+            <Button
+              type="submit"
+              size="icon"
+              className="h-14 w-14 rounded-2xl shrink-0"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            </Button>
+          </form>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto no-scrollbar pb-20">
