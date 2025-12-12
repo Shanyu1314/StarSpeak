@@ -1,7 +1,12 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { WordEntry } from '../types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+if (!apiKey) {
+  throw new Error('VITE_GEMINI_API_KEY is not configured in .env file');
+}
+
+const ai = new GoogleGenAI({ apiKey });
 const modelName = 'gemini-2.5-flash';
 
 // --- Lightning Lookup ---
