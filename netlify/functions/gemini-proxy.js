@@ -24,8 +24,8 @@ exports.handler = async (event) => {
   try {
     const { action, payload } = JSON.parse(event.body);
     const genAI = new GoogleGenerativeAI(apiKey);
-    // 尝试使用 gemini-1.5-flash 作为备选，它更稳定
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // 使用 gemini-3-pro-preview 最新模型
+    const model = genAI.getGenerativeModel({ model: "gemini-3-pro-preview" });
 
     let result;
 
