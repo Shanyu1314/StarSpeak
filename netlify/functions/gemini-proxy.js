@@ -11,16 +11,21 @@ exports.handler = async (event) => {
 
   const apiKey = process.env.VITE_GEMINI_API_KEY;
   if (!apiKey) {
+    console.error("API key not found in environment variables");
     return {
       statusCode: 500,
       body: JSON.stringify({ error: "API key not configured" }),
     };
   }
 
+  // 打印 API Key 前几位用于调试（不要打印完整 Key）
+  console.log("API Key prefix:", apiKey.substring(0, 10) + "...");
+
   try {
     const { action, payload } = JSON.parse(event.body);
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    // 尝试使用 gemini-1.5-flash 作为备选，它更稳定
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     let result;
 
