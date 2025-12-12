@@ -1,14 +1,15 @@
-# StarSpeak 使用指南
+# StarSpeak 用户使用指南
 
-## 概述
+## 简介
 
-StarSpeak 是一个个人英语学习系统，提供离线查词、AI助助、自由对话和智能练习等功能。
+StarSpeak 是一个现代化的个人英语学习系统，集成了多种学习工具帮助你提高英语水平。无论你是初学者还是进阶学习者，StarSpeak 都能满足你的需求。
 
 ## 系统要求
 
-- 现代浏览器（Chrome、Firefox、Safari、Edge）
-- 网络连接（用于AI功能和同步）
-- JavaScript 已启用
+- 现代浏览器：Chrome、Firefox、Safari、Edge
+- 稳定的网络连接（用于 AI 功能）
+- JavaScript 必须启用
+- 可选：麦克风（用于语音输入）
 
 ## 快速开始
 

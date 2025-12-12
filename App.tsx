@@ -18,6 +18,8 @@ const ChatIcon = ({ className }: {className?: string}) => <svg className={classN
 const DumbbellIcon = ({ className }: {className?: string}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg>;
 
 const NavBar = () => {
+  const { t } = useLanguage();
+
   const navClass = ({ isActive }: { isActive: boolean }) =>
     cn(
       "flex flex-col items-center justify-center gap-1 px-4 py-3 transition-all duration-200 rounded-xl relative",
@@ -39,7 +41,7 @@ const NavBar = () => {
             )}>
               <SOSIcon className={cn("w-6 h-6", isActive ? "text-white" : "")} />
             </div>
-            <span className="text-xs font-semibold">SOS</span>
+            <span className="text-xs font-semibold">{t('nav.sos')}</span>
             {isActive && <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-rose-500 to-orange-500 rounded-full"></div>}
           </>
         )}
@@ -55,7 +57,7 @@ const NavBar = () => {
             )}>
               <BookIcon className={cn("w-6 h-6", isActive ? "text-white" : "")} />
             </div>
-            <span className="text-xs font-semibold">查词</span>
+            <span className="text-xs font-semibold">{t('nav.lookup')}</span>
             {isActive && <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-sky-500 to-cyan-500 rounded-full"></div>}
           </>
         )}
@@ -71,7 +73,7 @@ const NavBar = () => {
             )}>
               <DumbbellIcon className={cn("w-6 h-6", isActive ? "text-white" : "")} />
             </div>
-            <span className="text-xs font-semibold">练习</span>
+            <span className="text-xs font-semibold">{t('nav.drill')}</span>
             {isActive && <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>}
           </>
         )}
@@ -87,7 +89,7 @@ const NavBar = () => {
             )}>
               <ChatIcon className={cn("w-6 h-6", isActive ? "text-white" : "")} />
             </div>
-            <span className="text-xs font-semibold">对话</span>
+            <span className="text-xs font-semibold">{t('nav.talk')}</span>
             {isActive && <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"></div>}
           </>
         )}
