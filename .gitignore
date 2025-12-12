@@ -23,3 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 .env
+# 字典数据
+ecdict.csv
+*.csv
+*乱序.txt
