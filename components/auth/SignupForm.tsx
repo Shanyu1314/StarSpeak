@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../src/hooks/useAuth';
+import { useLanguage } from '../../src/i18n/LanguageContext';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -14,6 +15,7 @@ export const SignupForm: React.FC = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const { signUp } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -34,7 +36,7 @@ export const SignupForm: React.FC = () => {
         }, 3000);
       }
     } catch (err) {
-      setError('注册失败,请稍后重试');
+      setError(t('auth.error'));
     } finally {
       setLoading(false);
     }
@@ -43,8 +45,8 @@ export const SignupForm: React.FC = () => {
   return (
     <div className="w-full space-y-6">
       <div className="text-center space-y-2">
-        <h2 className="text-3xl font-bold text-foreground">创建账户</h2>
-        <p className="text-muted-foreground">填写信息，开始你的学习之旅</p>
+        <h2 className="text-3xl font-bold text-foreground">{t('auth.signup')}</h2>
+        <p className="text-muted-foreground">Start your learning journey today</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -62,12 +64,12 @@ export const SignupForm: React.FC = () => {
             <svg className="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span>注册成功！3秒后自动跳转...</span>
+            <span>{t('common.success')}! Redirecting...</span>
           </div>
         )}
 
         <div className="space-y-2">
-          <Label htmlFor="username" className="text-sm font-semibold text-foreground">用户名</Label>
+          <Label htmlFor="username" className="text-sm font-semibold text-foreground">Username</Label>
           <div className="relative">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -77,7 +79,7 @@ export const SignupForm: React.FC = () => {
             <Input
               id="username"
               type="text"
-              placeholder="选择一个用户名"
+              placeholder="Choose a username"
               required
               className="h-12 pl-12 text-base border-2 rounded-xl focus-visible:ring-2"
               value={username}
@@ -87,7 +89,7 @@ export const SignupForm: React.FC = () => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-sm font-semibold text-foreground">邮箱地址</Label>
+          <Label htmlFor="email" className="text-sm font-semibold text-foreground">{t('auth.email')}</Label>
           <div className="relative">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -107,7 +109,7 @@ export const SignupForm: React.FC = () => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="password" className="text-sm font-semibold text-foreground">密码</Label>
+          <Label htmlFor="password" className="text-sm font-semibold text-foreground">{t('auth.password')}</Label>
           <div className="relative">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -117,7 +119,7 @@ export const SignupForm: React.FC = () => {
             <Input
               id="password"
               type="password"
-              placeholder="至少 6 个字符"
+              placeholder="At least 6 characters"
               required
               minLength={6}
               className="h-12 pl-12 text-base border-2 rounded-xl focus-visible:ring-2"
@@ -125,7 +127,7 @@ export const SignupForm: React.FC = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          <p className="text-xs text-muted-foreground ml-1">密码至少需要 6 个字符</p>
+          <p className="text-xs text-muted-foreground ml-1">Minimum 6 characters required</p>
         </div>
 
         <Button
@@ -138,10 +140,10 @@ export const SignupForm: React.FC = () => {
               <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
-              创建中...
+              {t('auth.signingUp')}
             </span>
           ) : (
-            '创建账户'
+            t('auth.signup')
           )}
         </Button>
       </form>

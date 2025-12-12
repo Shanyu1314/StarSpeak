@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { LoginForm } from '../components/auth/LoginForm';
 import { SignupForm } from '../components/auth/SignupForm';
+import { useLanguage } from '../src/i18n/LanguageContext';
 
 const AuthPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const { t } = useLanguage();
 
   return (
     <div className="min-h-full flex flex-col lg:flex-row">
@@ -24,7 +26,7 @@ const AuthPage: React.FC = () => {
               </div>
               <h1 className="text-5xl font-extrabold">StarSpeak</h1>
             </div>
-            <p className="text-2xl font-medium text-white/90">开启你的英语学习之旅</p>
+            <p className="text-2xl font-medium text-white/90">{isLogin ? 'Welcome back to' : 'Start your journey with'} StarSpeak</p>
           </div>
 
           {/* Features */}
@@ -36,8 +38,8 @@ const AuthPage: React.FC = () => {
                 </svg>
               </div>
               <div>
-                <h3 className="font-bold text-lg mb-1">AI 智能查词</h3>
-                <p className="text-white/80 text-sm">先进的AI技术，提供准确的释义和例句</p>
+                <h3 className="font-bold text-lg mb-1">{t('lookup.title')}</h3>
+                <p className="text-white/80 text-sm">Smart dictionary lookup with AI assistance</p>
               </div>
             </div>
 
@@ -48,8 +50,8 @@ const AuthPage: React.FC = () => {
                 </svg>
               </div>
               <div>
-                <h3 className="font-bold text-lg mb-1">离线词典</h3>
-                <p className="text-white/80 text-sm">无需网络，随时随地查询单词</p>
+                <h3 className="font-bold text-lg mb-1">{t('talk.title')}</h3>
+                <p className="text-white/80 text-sm">Offline access to comprehensive dictionary</p>
               </div>
             </div>
 
@@ -60,8 +62,8 @@ const AuthPage: React.FC = () => {
                 </svg>
               </div>
               <div>
-                <h3 className="font-bold text-lg mb-1">智能练习</h3>
-                <p className="text-white/80 text-sm">个性化的循环练习，巩固记忆</p>
+                <h3 className="font-bold text-lg mb-1">{t('drill.title')}</h3>
+                <p className="text-white/80 text-sm">Personalized spaced repetition practice</p>
               </div>
             </div>
           </div>
@@ -81,7 +83,7 @@ const AuthPage: React.FC = () => {
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              登录
+              {t('auth.login')}
             </button>
             <button
               onClick={() => setIsLogin(false)}
@@ -91,7 +93,7 @@ const AuthPage: React.FC = () => {
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              注册
+              {t('auth.signup')}
             </button>
           </div>
 

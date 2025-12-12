@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../src/hooks/useAuth';
+import { useLanguage } from '../../src/i18n/LanguageContext';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -12,6 +13,7 @@ export const LoginForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { signIn } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -29,7 +31,7 @@ export const LoginForm: React.FC = () => {
         navigate('/');
       }
     } catch (err) {
-      setError('登录失败,请稍后重试');
+      setError(t('auth.error'));
     } finally {
       setLoading(false);
     }
@@ -38,8 +40,8 @@ export const LoginForm: React.FC = () => {
   return (
     <div className="w-full space-y-6">
       <div className="text-center space-y-2">
-        <h2 className="text-3xl font-bold text-foreground">欢迎回来</h2>
-        <p className="text-muted-foreground">登录你的账户，继续学习之旅</p>
+        <h2 className="text-3xl font-bold text-foreground">{t('auth.login')}</h2>
+        <p className="text-muted-foreground">Continue your learning journey</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -53,7 +55,7 @@ export const LoginForm: React.FC = () => {
         )}
 
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-sm font-semibold text-foreground">邮箱地址</Label>
+          <Label htmlFor="email" className="text-sm font-semibold text-foreground">{t('auth.email')}</Label>
           <div className="relative">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -73,7 +75,7 @@ export const LoginForm: React.FC = () => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="password" className="text-sm font-semibold text-foreground">密码</Label>
+          <Label htmlFor="password" className="text-sm font-semibold text-foreground">{t('auth.password')}</Label>
           <div className="relative">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -102,10 +104,10 @@ export const LoginForm: React.FC = () => {
               <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
-              登录中...
+              {t('auth.signingIn')}
             </span>
           ) : (
-            '登录'
+            t('auth.login')
           )}
         </Button>
       </form>

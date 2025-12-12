@@ -8,6 +8,7 @@ import LoopDrillPage from './pages/LoopDrillPage';
 import AuthPage from './pages/AuthPage';
 import { AuthGuard } from './components/auth/AuthGuard';
 import { useAuth } from './src/hooks/useAuth';
+import { useLanguage, LanguageProvider } from './src/i18n/LanguageContext';
 import { cn } from './lib/utils';
 
 // Icons
@@ -97,6 +98,7 @@ const NavBar = () => {
 
 const UserBar = () => {
   const { user, signOut } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -114,12 +116,38 @@ const UserBar = () => {
         </div>
         <span className="text-sm font-medium text-foreground">{user.email}</span>
       </div>
-      <button
-        onClick={handleLogout}
-        className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all duration-200"
-      >
-        登出
-      </button>
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 bg-slate-100 rounded-lg p-1">
+          <button
+            onClick={() => setLanguage('en')}
+            className={cn(
+              "px-3 py-1 rounded-md text-xs font-medium transition-all duration-200",
+              language === 'en'
+                ? 'bg-white text-sky-600 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
+            )}
+          >
+            EN
+          </button>
+          <button
+            onClick={() => setLanguage('zh')}
+            className={cn(
+              "px-3 py-1 rounded-md text-xs font-medium transition-all duration-200",
+              language === 'zh'
+                ? 'bg-white text-sky-600 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
+            )}
+          >
+            中文
+          </button>
+        </div>
+        <button
+          onClick={handleLogout}
+          className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all duration-200"
+        >
+          {t('nav.logout')}
+        </button>
+      </div>
     </div>
   );
 };
@@ -139,7 +167,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     )
 }
 
-const App = () => {
+const AppContent = () => {
   return (
     <HashRouter>
         <Layout>
@@ -152,6 +180,14 @@ const App = () => {
           </Routes>
         </Layout>
     </HashRouter>
+  );
+};
+
+const App = () => {
+  return (
+    <LanguageProvider>
+      <AppContent />
+    </LanguageProvider>
   );
 };
 
