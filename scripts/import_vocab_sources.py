@@ -118,13 +118,14 @@ def import_words_with_tags(supabase: Client, words: List[Dict], source_tag: str)
         else:
             # 新单词，需要插入
             to_insert.append({
-                "word": word,
+                "word": word.lower(),
+                "display_word": word,
                 "phonetic": "",
+                "translation": word_data["definition"],
                 "definition": word_data["definition"],
-                "translation_cn": word_data["definition"],
                 "example": "",
-                "in_drill": False,
-                "source_tags": [source_tag]
+                "source_tags": [source_tag],
+                "is_ai_generated": False
             })
 
     print(f"   ✨ 需要插入: {len(to_insert)} 个")
