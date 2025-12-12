@@ -4,12 +4,14 @@ import { IWindow } from '../types';
 import { aiSOSResponse } from '../services/gemini';
 import { saveSOSScenario } from '../services/storage';
 import { useAuth } from '../src/hooks/useAuth';
+import { useLanguage } from '../src/i18n/LanguageContext';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { Skeleton } from '../components/ui/skeleton';
 
 const SOSPage: React.FC = () => {
   const { user, signOut } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -87,19 +89,19 @@ const SOSPage: React.FC = () => {
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-4xl font-extrabold tracking-tight">
-              Scene <span className="text-destructive">SOS</span>
+              {t('sos.title')}
             </h1>
-            <p className="text-muted-foreground mt-2 font-medium">Stuck? Say it in Chinese.</p>
+            <p className="text-muted-foreground mt-2 font-medium">{t('sos.subtitle')}</p>
           </div>
           <div className="text-right">
             <p className="text-xs text-muted-foreground mb-2">{user?.email}</p>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="sm"
               onClick={handleLogout}
               className="text-xs"
             >
-              登出
+              {t('nav.logout')}
             </Button>
           </div>
         </div>
@@ -120,11 +122,11 @@ const SOSPage: React.FC = () => {
           >
             <div className="text-center">
               {isRecording ? (
-                 <span className="text-white font-bold text-2xl animate-pulse">Listening...</span>
+                 <span className="text-white font-bold text-2xl animate-pulse">{t('sos.listening')}</span>
               ) : (
                 <>
                   <svg className="w-20 h-20 text-white mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
-                  <span className="text-white font-bold text-xl tracking-wider">Hold to Ask</span>
+                  <span className="text-white font-bold text-xl tracking-wider">{t('sos.ask')}</span>
                 </>
               )}
             </div>
@@ -161,21 +163,21 @@ const SOSPage: React.FC = () => {
               </div>
 
               <div className="grid gap-3">
-                <Button 
+                <Button
                   onClick={() => speak(result.native)}
                   size="lg"
                   className="w-full text-lg h-14"
                 >
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
-                  Listen Again
+                  {t('drill.listen')}
                 </Button>
-                
+
                 <Button
                    variant="ghost"
                    onClick={() => { setResult(null); setTranscript(''); }}
                    className="w-full text-muted-foreground hover:text-foreground"
                 >
-                  Ask Another
+                  {t('sos.ask')}
                 </Button>
               </div>
             </CardContent>

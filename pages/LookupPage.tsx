@@ -8,9 +8,11 @@ import { Card, CardContent } from '../components/ui/card';
 import { Skeleton } from '../components/ui/skeleton';
 import { Badge } from '../components/ui/badge';
 import { LoadingSpinner } from '../components/ui/loading-spinner';
+import { useLanguage } from '../src/i18n/LanguageContext';
 import { cn } from '../lib/utils';
 
 const LookupPage: React.FC = () => {
+  const { t } = useLanguage();
   const [query, setQuery] = useState('');
   const [result, setResult] = useState<WordEntry | null>(null);
   const [history, setHistory] = useState<WordEntry[]>([]);
@@ -59,13 +61,13 @@ const LookupPage: React.FC = () => {
         await loadHistory();
       } else {
         if (lookupMode === 'offline') {
-          setError("离线模式下未找到该单词。请切换到AI模式或尝试其他单词。");
+          setError(t('lookup.offlineNotFound'));
         } else {
-          setError("无法查询该单词，请检查网络连接。");
+          setError(t('lookup.queryFailed'));
         }
       }
     } catch (err) {
-      setError("查询失败，请检查网络连接。");
+      setError(t('lookup.queryFailed'));
       console.error('Search error:', err);
     } finally {
       setLoading(false);
@@ -82,7 +84,7 @@ const LookupPage: React.FC = () => {
 
   const handleDelete = async () => {
     if (!result) return;
-    if (!confirm(`确定要删除单词 "${result.word}" 吗?`)) return;
+    if (!confirm(`${t('common.confirm')} ${t('common.delete')} "${result.word}"?`)) return;
     
     try {
       await deleteWord(result.word);
@@ -122,7 +124,7 @@ const LookupPage: React.FC = () => {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-              <span>AI 智能</span>
+              <span>{t('lookup.ai')}</span>
             </button>
             <button
               type="button"
@@ -137,7 +139,7 @@ const LookupPage: React.FC = () => {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
-              <span>离线词典</span>
+              <span>{t('lookup.offline')}</span>
             </button>
           </div>
 
@@ -146,7 +148,7 @@ const LookupPage: React.FC = () => {
             value={query}
             onChange={setQuery}
             onSubmit={(word) => handleSearch(undefined, word)}
-            placeholder={lookupMode === 'ai' ? "输入单词，AI 智能查询..." : "输入单词，离线查询..."}
+            placeholder={t('lookup.placeholder')}
             suggestions={history.slice(0, 5).map(w => w.word)}
           />
         </div>
@@ -156,7 +158,7 @@ const LookupPage: React.FC = () => {
 
         {loading && (
           <div className="p-6 max-w-4xl mx-auto space-y-6 animate-fade-in">
-            <LoadingSpinner size="xl" text="正在查询..." className="py-20" />
+            <LoadingSpinner size="xl" text={t('common.loading')} className="py-20" />
             <div className="space-y-4">
               <Skeleton className="h-48 w-full rounded-3xl" />
               <Skeleton className="h-32 w-full rounded-3xl" />

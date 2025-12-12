@@ -5,10 +5,12 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { LoadingDots } from '../components/ui/loading-spinner';
 import { cn } from '../lib/utils';
+import { useLanguage } from '../src/i18n/LanguageContext';
 
 const FreeTalkPage: React.FC = () => {
+  const { t } = useLanguage();
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { id: '1', role: 'model', text: "Hey! I'm here to listen. What's on your mind today?", timestamp: Date.now() }
+    { id: '1', role: 'model', text: t('talk.greeting'), timestamp: Date.now() }
   ]);
   const [inputText, setInputText] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -39,7 +41,7 @@ const FreeTalkPage: React.FC = () => {
       const aiMsg: ChatMessage = { id: (Date.now() + 1).toString(), role: 'model', text: responseText, timestamp: Date.now() };
       setMessages(prev => [...prev, aiMsg]);
     } catch (e) {
-      setMessages(prev => [...prev, { id: 'err', role: 'model', text: "Sorry, I got disconnected. Can you say that again?", timestamp: Date.now() }]);
+      setMessages(prev => [...prev, { id: 'err', role: 'model', text: t('talk.error'), timestamp: Date.now() }]);
     } finally {
       setIsProcessing(false);
     }
@@ -72,10 +74,10 @@ const FreeTalkPage: React.FC = () => {
               </svg>
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-foreground">自由对话</h1>
+              <h1 className="text-3xl font-bold text-foreground">{t('talk.title')}</h1>
               <div className="flex items-center gap-2 mt-1">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-sm shadow-emerald-500/50"></span>
-                <p className="text-sm font-medium text-emerald-600">AI 正在倾听</p>
+                <p className="text-sm font-medium text-emerald-600">{t('talk.subtitle')}</p>
               </div>
             </div>
           </div>
@@ -124,7 +126,7 @@ const FreeTalkPage: React.FC = () => {
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="输入消息..."
+              placeholder={t('talk.placeholder')}
               className="h-14 pl-5 pr-5 text-base rounded-2xl border-2 border-border bg-white shadow-md hover:shadow-lg transition-all"
             />
           </div>

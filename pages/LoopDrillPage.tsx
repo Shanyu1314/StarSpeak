@@ -7,10 +7,12 @@ import { Card, CardContent } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { LoadingSpinner } from '../components/ui/loading-spinner';
 import { cn } from '../lib/utils';
+import { useLanguage } from '../src/i18n/LanguageContext';
 
 type DrillState = 'idle' | 'generating' | 'ready' | 'listening' | 'analyzing' | 'feedback';
 
 const LoopDrillPage: React.FC = () => {
+  const { t } = useLanguage();
   const [drillWords, setDrillWords] = useState<WordEntry[]>([]);
   const [currentScenario, setCurrentScenario] = useState('');
   const [status, setStatus] = useState<DrillState>('idle');
@@ -62,7 +64,7 @@ const LoopDrillPage: React.FC = () => {
       speak(scenario);
       setStatus('ready');
     } catch (e) {
-      setCurrentScenario("Connection error. Try again.");
+      setCurrentScenario(t('loopDrill.connectionError'));
       setStatus('idle');
     }
   };
@@ -72,7 +74,7 @@ const LoopDrillPage: React.FC = () => {
       setStatus('listening');
       recognitionRef.current.start();
     } else {
-        alert("Microphone not supported.");
+        alert(t('loopDrill.microphoneNotSupported'));
     }
   };
 
@@ -109,13 +111,13 @@ const LoopDrillPage: React.FC = () => {
               </div>
               <div>
                 <h2 className="text-3xl font-bold text-foreground flex items-center gap-2">
-                  循环练习
+                  {t('loopDrill.title')}
                 </h2>
-                <p className="text-muted-foreground text-sm">重复是记忆的关键</p>
+                <p className="text-muted-foreground text-sm">{t('loopDrill.subtitle')}</p>
               </div>
             </div>
             <Badge variant="primary" size="lg" className="hidden sm:flex">
-              {drillWords.length} 个单词
+              {drillWords.length} {t('loopDrill.wordCount')}
             </Badge>
           </div>
         </div>
@@ -131,8 +133,8 @@ const LoopDrillPage: React.FC = () => {
               </div>
             </div>
             <div className="space-y-2">
-              <p className="text-2xl font-bold text-foreground">准备开始练习</p>
-              <p className="text-muted-foreground">队列中有 {drillWords.length} 个单词等待练习</p>
+              <p className="text-2xl font-bold text-foreground">{t('loopDrill.readyToStart')}</p>
+              <p className="text-muted-foreground">{t('common.words')} {drillWords.length} {t('loopDrill.queueStatus')}</p>
             </div>
             <Button
               onClick={startRound}
@@ -142,7 +144,7 @@ const LoopDrillPage: React.FC = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              开始练习
+              {t('loopDrill.startPractice')}
             </Button>
           </div>
         )}
@@ -151,8 +153,8 @@ const LoopDrillPage: React.FC = () => {
           <div className="text-center space-y-6">
             <LoadingSpinner size="xl" />
             <div className="space-y-2">
-              <p className="text-xl font-bold text-primary">生成场景中...</p>
-              <p className="text-muted-foreground">请稍候</p>
+              <p className="text-xl font-bold text-primary">{t('loopDrill.generatingScenario')}</p>
+              <p className="text-muted-foreground">{t('loopDrill.pleaseWait')}</p>
             </div>
           </div>
         )}
@@ -169,7 +171,7 @@ const LoopDrillPage: React.FC = () => {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                         </svg>
                       </div>
-                      <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">练习场景</h3>
+                      <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">{t('loopDrill.scenarioLabel')}</h3>
                     </div>
                     <p className="text-2xl text-foreground font-medium leading-relaxed mb-6">{currentScenario}</p>
                     <div className="flex flex-wrap gap-2 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-4">
@@ -209,7 +211,7 @@ const LoopDrillPage: React.FC = () => {
                             "text-xl font-bold mb-2",
                             feedback.passed ? 'text-emerald-700' : 'text-rose-700'
                           )}>
-                            {feedback.passed ? '太棒了！' : '再试一次'}
+                            {feedback.passed ? t('loopDrill.excellent') : t('loopDrill.tryAgain')}
                           </p>
                           <p className={cn(
                             "text-base leading-relaxed",
@@ -235,7 +237,7 @@ const LoopDrillPage: React.FC = () => {
                                   <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                   </svg>
-                                  再试一次
+                                  {t('loopDrill.tryAgain')}
                                 </Button>
                             )}
                             {feedback?.passed && (
@@ -246,7 +248,7 @@ const LoopDrillPage: React.FC = () => {
                                   <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                   </svg>
-                                  下一个
+                                  {t('loopDrill.nextOne')}
                                 </Button>
                             )}
                         </div>
@@ -275,7 +277,7 @@ const LoopDrillPage: React.FC = () => {
                             )}
                           </button>
                           <p className="text-lg font-medium text-muted-foreground">
-                            {status === 'listening' ? '正在听...' : status === 'analyzing' ? '分析中...' : '点击开始说话'}
+                            {status === 'listening' ? t('loopDrill.listening') : status === 'analyzing' ? t('drill.analyzing') : t('loopDrill.clickToSpeak')}
                           </p>
                         </div>
                     )}
@@ -284,7 +286,7 @@ const LoopDrillPage: React.FC = () => {
                 {userTranscript && (
                   <Card className="bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-2xl">
                     <CardContent className="p-6">
-                      <p className="text-sm font-semibold text-indigo-600 mb-2">你说的内容：</p>
+                      <p className="text-sm font-semibold text-indigo-600 mb-2">{t('loopDrill.yourResponse')}</p>
                       <p className="text-lg text-indigo-900 italic">"{userTranscript}"</p>
                     </CardContent>
                   </Card>
